@@ -1,0 +1,9 @@
+version: '2'
+
+services:
+  sshguard:
+    image: drmurx/docker-systemd-sshguard:0.0.1
+    volumes:
+      - /var/log/journal:/app/journal
+    network_mode: host
+    privileged: true
