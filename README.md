@@ -10,6 +10,7 @@ It runs in a privileged container with the host's systemd journal directory bein
 There are a couple of environment variables you can pass to the container:
 
 * `IPTABLES_SETUP`, `IPTABLES_SETUP_IPV4` and `IPTABLES_SETUP_IPV6`: Set to "no" if you don't want the container to setup the required iptables rules in general, for IPv4 or IPv6, respectively (all default to "yes").
+* `IPTABLES_TEARDOWN`: Set to "no" if you want to keep the sshguard iptables after shutting down the container (defaults to "yes").
 * `IPTABLE_BASE`: Name of the iptables filter rule in which the jump to the sshguard table will be appended or inserted (defaults to "INPUT").
 * `IPTABLE_BASE_POS`: Position to insert the jump to the sshguard, or 0 to append (defaults to 0).
 * `SSHGUARD_LOOKBACK`: How many lines of the journal should be parsed on initial startup (defaults to 50).

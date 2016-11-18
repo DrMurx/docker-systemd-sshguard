@@ -7,6 +7,6 @@ RUN apt-get update && apt-get install -y \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY script/entrypoint.sh /app/entrypoint.sh
+COPY script/sshguard-stream-journal.sh /app/sshguard-stream-journal.sh
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/app/sshguard-stream-journal.sh"]
