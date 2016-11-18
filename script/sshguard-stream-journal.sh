@@ -33,6 +33,7 @@ function setupIptables {
   
   if [[ "${IPTABLES_SETUP_IPV4}" != "no" ]]; then
     /sbin/iptables -N sshguard 2> /dev/null
+    /sbin/iptables -F sshguard
     if ! /sbin/iptables -C "${IPTABLE_BASE}" -j sshguard 2> /dev/null; then
       /sbin/iptables ${iptCommand} -j sshguard
     fi
@@ -40,6 +41,7 @@ function setupIptables {
 
   if [[ "${IPTABLES_SETUP_IPV6}" != "no" ]]; then
     /sbin/ip6tables -N sshguard 2> /dev/null
+    /sbin/ip6tables -F sshguard
     if ! /sbin/ip6tables -C "${IPTABLE_BASE}" -j sshguard 2> /dev/null; then
       /sbin/ip6tables ${iptCommand} -j sshguard
     fi
@@ -66,10 +68,15 @@ if [[ "${IPTABLES_SETUP}" != "no" ]]; then
   setupIptables
 
   if [[ "${IPTABLES_TEARDOWN}" != "no" ]]; then
-    trap teardownIptables EXIT
+    # Trap to clean the IPTables; sleep is required to allow sshguard to release the lock on xtables
+    trap 'sleep 1; teardownIptables' EXIT
   fi
 fi
 
+# Trap to kill the background processes if this script is signalled to terminate
+trap 'kill $(jobs -p);' SIGHUP SIGINT SIGTERM
 
 /bin/journalctl -D /app/journal/ --no-pager -q -f -n "${SSHGUARD_LOOKBACK}" -t sshd \
-  | /usr/sbin/sshguard -s "${SSHGUARD_FORGET_CRACKER}" -p "${SSHGUARD_UNBLOCK_AFTER}"
+  | /usr/sbin/sshguard -s "${SSHGUARD_FORGET_CRACKER}" -p "${SSHGUARD_UNBLOCK_AFTER}" &
+
+wait

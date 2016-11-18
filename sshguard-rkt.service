@@ -5,7 +5,7 @@ Description=SSHGuard on rocket
 TimeoutStartSec=0
 Restart=always
 
-Environment=IMAGE_NAME=docker://drmurx/docker-systemd-sshguard:0.1.1
+Environment=IMAGE_NAME=docker://drmurx/docker-systemd-sshguard:0.2.0
 Environment=IPTABLE_BASE=INPUT
 Environment=IPTABLE_BASE_POS=0
 
