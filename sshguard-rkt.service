@@ -7,10 +7,17 @@ Restart=always
 
 Environment=IMAGE_NAME=docker://drmurx/docker-systemd-sshguard:0.1.1
 Environment=IPTABLE_BASE=INPUT
+Environment=IPTABLE_BASE_POS=0
 
 ExecStartPre=/usr/bin/rkt fetch --insecure-options=image $IMAGE_NAME
 
-ExecStart=/usr/bin/rkt run --volume journal,kind=host,source=/var/log/journal,readOnly=true --mount volume=journal,target=/app/journal --stage1-name=coreos.com/rkt/stage1-fly --insecure-options=image $IMAGE_NAME
+ExecStart=/usr/bin/rkt run --stage1-name coreos.com/rkt/stage1-fly \
+                           --volume journal,kind=host,source=/var/log/journal,readOnly=true \
+                           --mount volume=journal,target=/app/journal \
+                           --set-env IPTABLE_BASE=${IPTABLE_BASE} \
+                           --set-env IPTABLE_BASE_POS=${IPTABLE_BASE_POS} \
+                           --insecure-options image \
+                           ${IMAGE_NAME}
 
 ExecStopPost=/usr/bin/rkt gc --mark-only
 
