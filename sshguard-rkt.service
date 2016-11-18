@@ -5,16 +5,8 @@ Description=SSHGuard on rocket
 TimeoutStartSec=0
 Restart=always
 
-Environment=IMAGE_NAME=drmurx/docker-systemd-sshguard:0.0.1
-Environment=BASE_IPTABLE=INPUT
-
-ExecStartPre=-/usr/sbin/iptables -N sshguard
-ExecStartPre=-/usr/sbin/iptables -D $BASE_IPTABLE -j sshguard
-ExecStartPre=/usr/sbin/iptables -A $BASE_IPTABLE -j sshguard
-
-ExecStartPre=-/usr/sbin/ip6tables -N sshguard
-ExecStartPre=-/usr/sbin/ip6tables -D $BASE_IPTABLE -j sshguard
-ExecStartPre=/usr/sbin/ip6tables -A $BASE_IPTABLE -j sshguard
+Environment=IMAGE_NAME=docker://drmurx/docker-systemd-sshguard:0.1.1
+Environment=IPTABLE_BASE=INPUT
 
 ExecStartPre=/usr/bin/rkt fetch --insecure-options=image $IMAGE_NAME
 

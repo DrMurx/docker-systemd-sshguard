@@ -6,16 +6,8 @@ Requires=docker.service
 [Service]
 TimeoutStartSec=0
 
-Environment=IMAGE_NAME=drmurx/docker-systemd-sshguard:0.0.1
-Environment=BASE_IPTABLE=INPUT
-
-ExecStartPre=-/usr/sbin/iptables -N sshguard
-ExecStartPre=-/usr/sbin/iptables -D $BASE_IPTABLE -j sshguard
-ExecStartPre=/usr/sbin/iptables -A $BASE_IPTABLE -j sshguard
-
-ExecStartPre=-/usr/sbin/ip6tables -N sshguard
-ExecStartPre=-/usr/sbin/ip6tables -D $BASE_IPTABLE -j sshguard
-ExecStartPre=/usr/sbin/ip6tables -A $BASE_IPTABLE -j sshguard
+Environment=IMAGE_NAME=drmurx/docker-systemd-sshguard:0.1.1
+Environment=IPTABLE_BASE=INPUT
 
 ExecStartPre=-/usr/bin/docker kill %p
 ExecStartPre=-/usr/bin/docker rm %p
