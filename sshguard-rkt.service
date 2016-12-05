@@ -14,8 +14,7 @@ ExecStartPre=/usr/bin/rkt fetch --insecure-options=image $IMAGE_NAME
 ExecStart=/usr/bin/rkt run --stage1-name coreos.com/rkt/stage1-fly \
                            --volume journal,kind=host,source=/var/log/journal,readOnly=true \
                            --mount volume=journal,target=/app/journal \
-                           --set-env IPTABLE_BASE=${IPTABLE_BASE} \
-                           --set-env IPTABLE_BASE_POS=${IPTABLE_BASE_POS} \
+                           --inherit-env \
                            --insecure-options image \
                            ${IMAGE_NAME}
 
