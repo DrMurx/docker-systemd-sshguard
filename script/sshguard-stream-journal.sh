@@ -14,8 +14,8 @@ IPTABLE_BASE="${IPTABLE_BASE:-INPUT}"
 # Position to insert the jump to the sshguard, or 0 to append
 IPTABLE_BASE_POS="${IPTABLE_BASE_POS:-0}"
 
-# How many lines of the journal should be parsed on initial startup
-SSHGUARD_LOOKBACK="${SSHGUARD_LOOKBACK:-50}"
+# Starting point in the journal, can be any absolute or relative timestamp `strtotime` is able to parse.
+JOURNALD_START_AT="${JOURNALD_START_AT:-2 hours ago}"
 
 # Specify after how many seconds sshguard will forget an attack
 SSHGUARD_FORGET_CRACKER="${SSHGUARD_FORGET_CRACKER:-1200}"
@@ -76,7 +76,7 @@ fi
 # Trap to kill the background processes if this script is signalled to terminate
 trap 'kill $(jobs -p);' SIGHUP SIGINT SIGTERM
 
-/bin/journalctl -D /app/journal/ --no-pager -q -f -n "${SSHGUARD_LOOKBACK}" -t sshd \
+/bin/journalctl -D /app/journal/ --no-pager -q -f -S "${JOURNALD_START_AT}" -t sshd \
   | /usr/sbin/sshguard -s "${SSHGUARD_FORGET_CRACKER}" -p "${SSHGUARD_UNBLOCK_AFTER}" &
 
 wait
