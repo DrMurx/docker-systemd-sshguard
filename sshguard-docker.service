@@ -6,7 +6,7 @@ Requires=docker.service
 [Service]
 TimeoutStartSec=0
 
-Environment=IMAGE_NAME=drmurx/docker-systemd-sshguard:0.3.0
+Environment=IMAGE_NAME=drmurx/docker-systemd-sshguard:0.4.0
 Environment=IPTABLE_BASE=INPUT
 Environment=IPTABLE_BASE_POS=0
 
