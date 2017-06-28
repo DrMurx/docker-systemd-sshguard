@@ -1,7 +1,8 @@
-FROM ubuntu:16.04
+FROM ubuntu:17.04
 MAINTAINER Jan Kunzmann <jan-docker@phobia.de>
 
 RUN apt-get update && apt-get install -y \
+                        systemd \
                         sshguard \
                         iptables \
   && apt-get clean \
