@@ -11,8 +11,7 @@ There are a couple of environment variables you can pass to the container:
 
 * `IPTABLES_SETUP`, `IPTABLES_SETUP_IPV4` and `IPTABLES_SETUP_IPV6`: Set to "no" if you don't want the container to setup the required iptables rules in general, for IPv4 or IPv6, respectively (all default to "yes").
 * `IPTABLES_TEARDOWN`: Set to "no" if you want to keep the sshguard iptables after shutting down the container (defaults to "yes").
-* `IPTABLE_BASE`: Name of the iptables filter rule in which the jump to the sshguard table will be appended or inserted (defaults to "INPUT").
-* `IPTABLE_BASE_POS`: Position in the iptables filter rule where to insert the jump to the sshguard table, or 0 to append (defaults to 0).
+* `IPTABLES_HOOKS`: A comma separated list of iptables filter chains in the jump to the sshguard table will be appended (default) or inserted. Add an optional `:n` to each chain name to insert at the nth position. (defaults to "INPUT:1").
 * `JOURNALD_START_AT`: Starting point in the journal, can be any absolute or relative timestamp `strtotime` is able to parse (defaults to "2 hours ago").
 * `SSHGUARD_FORGET_CRACKER`: Specify after how many seconds sshguard will forget an attack (defaults to 1200).
 * `SSHGUARD_UNBLOCK_AFTER`: Specify the baseline number of seconds an attacker will be blocked (defaults to 420).

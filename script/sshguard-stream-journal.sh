@@ -8,11 +8,9 @@ IPTABLES_SETUP_IPV6="${IPTABLES_SETUP_IPV6:-yes}"
 # Set to "no" if you want to keep the sshguard iptables after shutting down the container
 IPTABLES_TEARDOWN="${IPTABLES_TEARDOWN:-yes}"
 
-# Name of the iptables filter rule in which the jump to the sshguard table will be appended or inserted
-IPTABLE_BASE="${IPTABLE_BASE:-INPUT}"
-
-# Position to insert the jump to the sshguard, or 0 to append
-IPTABLE_BASE_POS="${IPTABLE_BASE_POS:-0}"
+# A comma separated list of iptables filter chains in the jump to the sshguard table will be appended (default) or inserted.
+# Add an optional `:n` to each chain name to insert at the nth position.
+IPTABLES_HOOK="${IPTABLES_HOOK:-INPUT:1}"
 
 # Starting point in the journal, can be any absolute or relative timestamp `strtotime` is able to parse.
 JOURNALD_START_AT="${JOURNALD_START_AT:-2 hours ago}"
@@ -33,20 +31,26 @@ function setupAllIptables {
   fi
 }
 
-function setupIptables {  
+function setupIptables {
   IPTABLES=${1}
 
-  if [[ "${IPTABLE_BASE_POS}" -gt 0 ]]; then
-    iptCommand="-I ${IPTABLE_BASE} ${IPTABLE_BASE_POS}"
-  else
-    iptCommand="-A ${IPTABLE_BASE}"
-  fi
-  
+  declare -a hooks
+  hooks=($(echo ${IPTABLES_HOOK} | sed -e 's/,/ /g'))
+
   ${IPTABLES} -N sshguard 2> /dev/null
   ${IPTABLES} -F sshguard
-  if ! ${IPTABLES} -C "${IPTABLE_BASE}" -j sshguard 2> /dev/null; then
-    ${IPTABLES} ${iptCommand} -j sshguard
-  fi
+  for hook in ${hooks[*]}; do
+    pos=${hook#*:}
+    hook=${hook%:*}
+    if [[ "${pos:-0}" -gt 0 ]]; then
+      iptCommand="-I ${hook} ${pos}"
+    else
+      iptCommand="-A ${hook}"
+    fi
+    if ! ${IPTABLES} -C "${hook}" -j sshguard 2> /dev/null; then
+      ${IPTABLES} ${iptCommand} -j sshguard
+    fi
+  done
 }
 
 
@@ -62,7 +66,13 @@ function teardownAllIptables {
 function teardownIptables {
   IPTABLES=${1}
 
-  ${IPTABLES} -D "${IPTABLE_BASE}" -j sshguard
+  declare -a hooks
+  hooks=($(echo ${IPTABLES_HOOK} | sed -e 's/,/ /g'))
+
+  for hook in ${hooks[*]}; do
+    hook=${hook%:*}
+    ${IPTABLES} -D "${hook}" -j sshguard
+  done
   ${IPTABLES} -F sshguard
   ${IPTABLES} -X sshguard
 }
