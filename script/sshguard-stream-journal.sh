@@ -24,52 +24,56 @@ SSHGUARD_FORGET_CRACKER="${SSHGUARD_FORGET_CRACKER:-1200}"
 SSHGUARD_UNBLOCK_AFTER="${SSHGUARD_UNBLOCK_AFTER:-420}"
 
 
-function setupIptables {
+function setupAllIptables {
+  if [[ "${IPTABLES_SETUP_IPV4}" != "no" ]]; then
+    setupIptables /sbin/iptables
+  fi
+  if [[ "${IPTABLES_SETUP_IPV6}" != "no" ]]; then
+    setupIptables /sbin/ip6tables
+  fi
+}
+
+function setupIptables {  
+  IPTABLES=${1}
+
   if [[ "${IPTABLE_BASE_POS}" -gt 0 ]]; then
     iptCommand="-I ${IPTABLE_BASE} ${IPTABLE_BASE_POS}"
   else
     iptCommand="-A ${IPTABLE_BASE}"
   fi
   
-  if [[ "${IPTABLES_SETUP_IPV4}" != "no" ]]; then
-    /sbin/iptables -N sshguard 2> /dev/null
-    /sbin/iptables -F sshguard
-    if ! /sbin/iptables -C "${IPTABLE_BASE}" -j sshguard 2> /dev/null; then
-      /sbin/iptables ${iptCommand} -j sshguard
-    fi
-  fi
-
-  if [[ "${IPTABLES_SETUP_IPV6}" != "no" ]]; then
-    /sbin/ip6tables -N sshguard 2> /dev/null
-    /sbin/ip6tables -F sshguard
-    if ! /sbin/ip6tables -C "${IPTABLE_BASE}" -j sshguard 2> /dev/null; then
-      /sbin/ip6tables ${iptCommand} -j sshguard
-    fi
+  ${IPTABLES} -N sshguard 2> /dev/null
+  ${IPTABLES} -F sshguard
+  if ! ${IPTABLES} -C "${IPTABLE_BASE}" -j sshguard 2> /dev/null; then
+    ${IPTABLES} ${iptCommand} -j sshguard
   fi
 }
 
 
-function teardownIptables {
+function teardownAllIptables {
   if [[ "${IPTABLES_SETUP_IPV4}" != "no" ]]; then
-    /sbin/iptables -D "${IPTABLE_BASE}" -j sshguard
-    /sbin/iptables -F sshguard
-    /sbin/iptables -X sshguard
+    teardownIptables /sbin/iptables
   fi
-
   if [[ "${IPTABLES_SETUP_IPV6}" != "no" ]]; then
-    /sbin/ip6tables -D "${IPTABLE_BASE}" -j sshguard
-    /sbin/ip6tables -F sshguard
-    /sbin/ip6tables -X sshguard
+    teardownIptables /sbin/ip6tables
   fi
+}
+
+function teardownIptables {
+  IPTABLES=${1}
+
+  ${IPTABLES} -D "${IPTABLE_BASE}" -j sshguard
+  ${IPTABLES} -F sshguard
+  ${IPTABLES} -X sshguard
 }
 
 
 if [[ "${IPTABLES_SETUP}" != "no" ]]; then
-  setupIptables
+  setupAllIptables
 
   if [[ "${IPTABLES_TEARDOWN}" != "no" ]]; then
     # Trap to clean the IPTables; sleep is required to allow sshguard to release the lock on xtables
-    trap 'sleep 1; teardownIptables' EXIT
+    trap 'sleep 1; teardownAllIptables' EXIT
   fi
 fi
 
