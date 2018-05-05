@@ -91,6 +91,7 @@ fi
 trap 'kill $(jobs -p);' SIGHUP SIGINT SIGTERM
 
 /bin/journalctl -D /app/journal/ --no-pager -q -f -S "${JOURNALD_START_AT}" -t sshd \
+  | egrep -v 'Connection closed by .* port .*\[preauth\]|Did not receive identification string from' \
   | /usr/sbin/sshguard -s "${SSHGUARD_FORGET_CRACKER}" -p "${SSHGUARD_UNBLOCK_AFTER}" &
 
 wait
