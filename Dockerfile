@@ -1,4 +1,4 @@
-FROM ubuntu:17.04
+FROM ubuntu:18.04
 MAINTAINER Jan Kunzmann <jan-docker@phobia.de>
 
 RUN apt-get update && apt-get install -y \
